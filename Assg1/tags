@@ -1,0 +1,69 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+AttributeSize	/home/rex/CODE/C++/443/Assg1/library.h	/^const int AttributeSize = 10;$/;"	v
+Heapfile	/home/rex/CODE/C++/443/Assg1/library.h	/^} Heapfile;$/;"	t	typeref:struct:__anon3
+LIBRARY_H	/home/rex/CODE/C++/443/Assg1/library.h	2;"	d
+Page	/home/rex/CODE/C++/443/Assg1/library.h	/^} Page;$/;"	t	typeref:struct:__anon1
+PageID	/home/rex/CODE/C++/443/Assg1/library.h	/^typedef int PageID;$/;"	t
+Record	/home/rex/CODE/C++/443/Assg1/library.h	/^typedef std::vector<V> Record;$/;"	t
+RecordID	/home/rex/CODE/C++/443/Assg1/library.h	/^} RecordID;$/;"	t	typeref:struct:__anon2
+RecordIterator	/home/rex/CODE/C++/443/Assg1/library.h	/^    RecordIterator(Heapfile *heapfile);$/;"	p	class:RecordIterator	access:public	signature:(Heapfile *heapfile)
+RecordIterator	/home/rex/CODE/C++/443/Assg1/library.h	/^class RecordIterator {$/;"	c
+RecordIterator::RecordIterator	/home/rex/CODE/C++/443/Assg1/library.h	/^    RecordIterator(Heapfile *heapfile);$/;"	p	class:RecordIterator	access:public	signature:(Heapfile *heapfile)
+RecordIterator::cur	/home/rex/CODE/C++/443/Assg1/library.h	/^	int cur;$/;"	m	class:RecordIterator	access:private
+RecordIterator::cur_page	/home/rex/CODE/C++/443/Assg1/library.h	/^	Page cur_page;$/;"	m	class:RecordIterator	access:private
+RecordIterator::cur_record	/home/rex/CODE/C++/443/Assg1/library.h	/^	int cur_record;$/;"	m	class:RecordIterator	access:private
+RecordIterator::dir_ent_size	/home/rex/CODE/C++/443/Assg1/library.h	/^	int dir_ent_size;$/;"	m	class:RecordIterator	access:private
+RecordIterator::dir_page	/home/rex/CODE/C++/443/Assg1/library.h	/^	void * dir_page;$/;"	m	class:RecordIterator	access:private
+RecordIterator::hasNext	/home/rex/CODE/C++/443/Assg1/library.h	/^    bool hasNext();$/;"	p	class:RecordIterator	access:public	signature:()
+RecordIterator::hp	/home/rex/CODE/C++/443/Assg1/library.h	/^	Heapfile * hp;$/;"	m	class:RecordIterator	access:private
+RecordIterator::nbPages_dir	/home/rex/CODE/C++/443/Assg1/library.h	/^	int nbPages_dir;$/;"	m	class:RecordIterator	access:private
+RecordIterator::next	/home/rex/CODE/C++/443/Assg1/library.h	/^    Record next();$/;"	p	class:RecordIterator	access:public	signature:()
+RecordIterator::pos	/home/rex/CODE/C++/443/Assg1/library.h	/^	void * pos;$/;"	m	class:RecordIterator	access:private
+RecordIterator::r	/home/rex/CODE/C++/443/Assg1/library.h	/^	Record r;$/;"	m	class:RecordIterator	access:private
+RecordIterator::~RecordIterator	/home/rex/CODE/C++/443/Assg1/library.h	/^	~RecordIterator();$/;"	p	class:RecordIterator	access:public	signature:()
+V	/home/rex/CODE/C++/443/Assg1/library.h	/^typedef char* V;$/;"	t
+__anon1::data	/home/rex/CODE/C++/443/Assg1/library.h	/^    void *data;$/;"	m	struct:__anon1	access:public
+__anon1::page_size	/home/rex/CODE/C++/443/Assg1/library.h	/^    int page_size;$/;"	m	struct:__anon1	access:public
+__anon1::slot_size	/home/rex/CODE/C++/443/Assg1/library.h	/^ 	int slot_size;$/;"	m	struct:__anon1	access:public
+__anon2::page_offset	/home/rex/CODE/C++/443/Assg1/library.h	/^	int page_offset;$/;"	m	struct:__anon2	access:public
+__anon2::slot	/home/rex/CODE/C++/443/Assg1/library.h	/^	int slot;$/;"	m	struct:__anon2	access:public
+__anon3::file_ptr	/home/rex/CODE/C++/443/Assg1/library.h	/^	FILE * file_ptr;$/;"	m	struct:__anon3	access:public
+__anon3::page_size	/home/rex/CODE/C++/443/Assg1/library.h	/^	int page_size;$/;"	m	struct:__anon3	access:public
+add_fixed_len_page	/home/rex/CODE/C++/443/Assg1/library.h	/^int add_fixed_len_page(Page *page, Record *r);$/;"	p	signature:(Page *page, Record *r)
+alloc_page	/home/rex/CODE/C++/443/Assg1/library.h	/^PageID alloc_page(Heapfile *heapfile);$/;"	p	signature:(Heapfile *heapfile)
+cur	/home/rex/CODE/C++/443/Assg1/library.h	/^	int cur;$/;"	m	class:RecordIterator	access:private
+cur_page	/home/rex/CODE/C++/443/Assg1/library.h	/^	Page cur_page;$/;"	m	class:RecordIterator	access:private
+cur_record	/home/rex/CODE/C++/443/Assg1/library.h	/^	int cur_record;$/;"	m	class:RecordIterator	access:private
+data	/home/rex/CODE/C++/443/Assg1/library.h	/^    void *data;$/;"	m	struct:__anon1	access:public
+dir_ent_size	/home/rex/CODE/C++/443/Assg1/library.h	/^	int dir_ent_size;$/;"	m	class:RecordIterator	access:private
+dir_page	/home/rex/CODE/C++/443/Assg1/library.h	/^	void * dir_page;$/;"	m	class:RecordIterator	access:private
+file_ptr	/home/rex/CODE/C++/443/Assg1/library.h	/^	FILE * file_ptr;$/;"	m	struct:__anon3	access:public
+fixed_len_page_capacity	/home/rex/CODE/C++/443/Assg1/library.h	/^int fixed_len_page_capacity(Page *page);$/;"	p	signature:(Page *page)
+fixed_len_page_freeslots	/home/rex/CODE/C++/443/Assg1/library.h	/^int fixed_len_page_freeslots(Page *page);$/;"	p	signature:(Page *page)
+fixed_len_read	/home/rex/CODE/C++/443/Assg1/library.h	/^void fixed_len_read(void *buf, int size, Record *record);$/;"	p	signature:(void *buf, int size, Record *record)
+fixed_len_sizeof	/home/rex/CODE/C++/443/Assg1/library.h	/^int fixed_len_sizeof(Record *record);$/;"	p	signature:(Record *record)
+fixed_len_write	/home/rex/CODE/C++/443/Assg1/library.h	/^void fixed_len_write(Record *record, void *buf);$/;"	p	signature:(Record *record, void *buf)
+hasNext	/home/rex/CODE/C++/443/Assg1/library.h	/^    bool hasNext();$/;"	p	class:RecordIterator	access:public	signature:()
+hp	/home/rex/CODE/C++/443/Assg1/library.h	/^	Heapfile * hp;$/;"	m	class:RecordIterator	access:private
+init_fixed_len_page	/home/rex/CODE/C++/443/Assg1/library.h	/^void init_fixed_len_page(Page *page, int page_size, int slot_size);$/;"	p	signature:(Page *page, int page_size, int slot_size)
+init_heapfile	/home/rex/CODE/C++/443/Assg1/library.h	/^void init_heapfile(Heapfile *heapfile, int page_size, FILE *file);$/;"	p	signature:(Heapfile *heapfile, int page_size, FILE *file)
+nbAttributes	/home/rex/CODE/C++/443/Assg1/library.h	/^const int nbAttributes = 100;$/;"	v
+nbPages_dir	/home/rex/CODE/C++/443/Assg1/library.h	/^	int nbPages_dir;$/;"	m	class:RecordIterator	access:private
+next	/home/rex/CODE/C++/443/Assg1/library.h	/^    Record next();$/;"	p	class:RecordIterator	access:public	signature:()
+page_offset	/home/rex/CODE/C++/443/Assg1/library.h	/^	int page_offset;$/;"	m	struct:__anon2	access:public
+page_size	/home/rex/CODE/C++/443/Assg1/library.h	/^	int page_size;$/;"	m	struct:__anon3	access:public
+page_size	/home/rex/CODE/C++/443/Assg1/library.h	/^    int page_size;$/;"	m	struct:__anon1	access:public
+pos	/home/rex/CODE/C++/443/Assg1/library.h	/^	void * pos;$/;"	m	class:RecordIterator	access:private
+r	/home/rex/CODE/C++/443/Assg1/library.h	/^	Record r;$/;"	m	class:RecordIterator	access:private
+read_fixed_len_page	/home/rex/CODE/C++/443/Assg1/library.h	/^void read_fixed_len_page(Page *page, int slot, Record *r);$/;"	p	signature:(Page *page, int slot, Record *r)
+read_page	/home/rex/CODE/C++/443/Assg1/library.h	/^void read_page(Heapfile *heapfile, PageID pid, Page *page);$/;"	p	signature:(Heapfile *heapfile, PageID pid, Page *page)
+slot	/home/rex/CODE/C++/443/Assg1/library.h	/^	int slot;$/;"	m	struct:__anon2	access:public
+slot_size	/home/rex/CODE/C++/443/Assg1/library.h	/^ 	int slot_size;$/;"	m	struct:__anon1	access:public
+write_fixed_len_page	/home/rex/CODE/C++/443/Assg1/library.h	/^void write_fixed_len_page(Page *page, int slot, Record *r);$/;"	p	signature:(Page *page, int slot, Record *r)
+write_page	/home/rex/CODE/C++/443/Assg1/library.h	/^void write_page(Page *page, Heapfile *heapfile, PageID pid);$/;"	p	signature:(Page *page, Heapfile *heapfile, PageID pid)
+~RecordIterator	/home/rex/CODE/C++/443/Assg1/library.h	/^	~RecordIterator();$/;"	p	class:RecordIterator	access:public	signature:()
