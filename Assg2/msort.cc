@@ -57,7 +57,32 @@ Record* RunIterator::next(){
 
 
 void merge_runs(FILE *out_fp, 
-				RunIterator* iterators, 
+				RunIterator iterators[], 
 				int num_iterators,
-			    long buf_size);
+			    long buf_size)
+{
+	Record *buf[buf_size];  // idk if this is how u do this
+	RunIterator *iter;
+	int done_iterators = 0;
+
+	while(done_iterators < num_iterators){
+		int num = 0;
+
+		done_iterators = 0;
+
+		for(int i = 0; i < num_iterators; i++){
+			Record *temp = iterators[i].next();
+			if(temp != NULL){
+				buf[i] = temp;
+				num++;
+				done_iterators++;
+			}
+
+		}
+
+		qsort((void *)buf, num, sizeof(Record), strcmp);
+		fputs((const char *)buf,out_fp);
+	}
+	
+}
 
