@@ -28,7 +28,7 @@ typedef struct {
 
 
 
-
+int cmpstr(void const *a, void const *b);
 
 /** 
  * Compute the number of bytes to serialize record

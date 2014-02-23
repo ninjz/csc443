@@ -165,6 +165,19 @@ void mk_filePage (FILE *out_fp, char* filename, int page_size){
 
 
 /**
+
+used for qsort
+
+
+**/
+int cmpstr(void const *a, void const *b) { 
+    char const *aa = (char const *)a;
+    char const *bb = (char const *)b;
+
+    return strcmp(aa, bb);
+}
+
+/**
 * creates runs of length `run_length` in
 * the `out_fp`. this uses an in-memory sort algorithm
 */
@@ -192,38 +205,53 @@ void mk_runs(FILE *in_fp, FILE *out_fp, long run_length){
 	// //*********************Added by Amr*******************************
 
 	//1.read run_length records into buffer the first time
-	int nbrecords =0;
+	int nbRecords =0;
 	Page p;
 	Record r;
 	char c;
 	printf("this is the size of page_size%d\n", page_size);
 	init_fixed_len_page(&p,page_size,AttributeSize*nbAttributes);
 	char * buf = (char *) malloc(run_length);
+	//int nbRecordsForlastPage = 0;
 
-	while (run_length - nbrecords >= page_size){ // read pages into memory  until we can't fit any more pages
+	while(1){ //keep running until there is no more pages in a file
 
 
-		memset(p.data,0,p.page_size); //set page to zero 
-		fread(p.data,p.page_size,sizeof(char),in_fp); //read one page from in_fp filepage
-		int nbSlots = fixed_len_page_capacity(&p); 
-		int freeSlots = fixed_len_page_freeslots(&p);
+		while (run_length - nbRecords >= page_size){ // read pages into memory  until we can't fit any more pages
 
-		for(int i=0;i<nbSlots-freeSlots;i++){
-			nbRecords++;
-			read_fixed_len_page(&p,i,&r);
-			memcpy(buf, r, nbAttributes*AttributeSize); //copy into buf
-			buf = (char * ) buf + nbAttributes*AttributeSize;
+			memset(p.data,0,p.page_size); //set page to zero 
+			fread(p.data,p.page_size,sizeof(char),in_fp); //read one page from in_fp filepage
+			int nbSlots = fixed_len_page_capacity(&p); 
+			int freeSlots = fixed_len_page_freeslots(&p);
+
+			for(int i=0;i<nbSlots-freeSlots;i++){
+
+				nbRecords++;
+				read_fixed_len_page(&p,i,&r);
+				memcpy(buf, r, nbAttributes*AttributeSize); //copy into buf
+				buf = (char * ) buf + nbAttributes*AttributeSize;
+			}
+
+
 		}
-		qsort((void *)buf, nbrecords, sizeof(Record), strcmp);
-		fwrite(buf, run_length,sizeof(char),out_fp);
 
+
+		qsort((void *) buf, run_length, sizeof(Record), cmpstr);
+		fwrite(buf,run_length, sizeof(char), out_fp);
+		//set nbRecords to 0 in order to use for another run
+		nbRecords =0;
+
+		//check for the 
+		c= fgetc(in_fp);
+		if (c == EOF ) break;
+		ungetc(c, in_fp);
 
 	}
-	qsort((void *) buf, nbrecords, sizeof(Record), strcmp);
-	fwrite(buf, nbrecords, sizeof(char), out_fp);
+
+	qsort((void *) buf, nbRecords, sizeof(Record), cmpstr);
+	fwrite(buf,nbRecords, sizeof(char), out_fp);
 	free(buf);
 	free(p.data);
-
 }
 // /**
 // * currently does not use page reads.
@@ -314,7 +342,6 @@ int main(int argc, char * argv[]){
 
 	}
 
-
 	in_fp = fopen("in_fp", "w");
 	if(in_fp == NULL){
 		exit(0);
@@ -329,9 +356,10 @@ int main(int argc, char * argv[]){
 	//make page files of size page_size
 	mk_filePage(in_fp, argv[1],page_size);
 	//each record is of size 9 so the length of the first run is 
-	int run_length = mem_capacity/9;
+	long run_length = mem_capacity/9;
 	//create runs of size mem_capacity and that is mem_capacity sorted. 
 	mk_runs(in_fp, out_fp, run_length);
+	//merge runs from out_fp
 	fclose(in_fp);
 	fclose(out_fp);
 
