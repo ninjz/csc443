@@ -226,7 +226,7 @@ void mk_runs(FILE *in_fp, FILE *out_fp, long run_length){
 
 			break;
 		}
-		ungetc(in_fp, c);
+		ungetc(c, in_fp);
 	}
 	free(buf);
 
