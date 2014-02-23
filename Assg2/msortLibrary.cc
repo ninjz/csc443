@@ -191,20 +191,43 @@ void mk_runs(FILE *in_fp, FILE *out_fp, long run_length){
 
 
 	// //*****************Done by Calvin**************************
-	char * buf;
-	int amount_read;
-	buf = (char *) malloc(run_length);
+	// char * buf;
+	// int amount_read;
+	// buf = (char *) malloc(run_length);
 	
-    while ( ! feof (in_fp) ){
-    	// Grab run_length amount of data and put in buf to be sorted.
-		amount_read = fread(buf , run_length, 1, in_fp);	
-    	// sort data in buf.
-		qsort((void *)buf, amount_read, sizeof(Record), cmpstr);
-		fputs(buf, out_fp);
-    }
+ //    while ( ! feof (in_fp) ){
+ //    	// Grab run_length amount of data and put in buf to be sorted.
+	// 	amount_read = fread(buf , run_length, 1, in_fp);	
+ //    	// sort data in buf.
+	// 	qsort((void *)buf, amount_read, sizeof(Record), cmpstr);
+	// 	fputs(buf, out_fp);
+ //    }
 
-    fclose(in_fp);
-    fclose(out_fp);
+ //    fclose(in_fp);
+ //    fclose(out_fp);
+	// free(buf);
+
+	
+	//run_length is the number of records that can fit in the memory
+	char c;
+	char * buf;
+	printf("size of record is %d\n",sizeof(Record));
+	buf = (char *) malloc(run_length*sizeof(Record));
+	int nbrecords=0;
+	while(1){
+
+		//if not the end of the file
+		nbrecords = read(buf, run_length*(sizeof(Record)), 1 , inf_fp);
+		qsort((void *) buf, nbrecords/sizeof(Record), sizeof(Record) ,cmpstr);
+		fputs(buf, out_fp);
+
+		c = fgetc(in_fp);
+		if (c ==EOF){
+
+			break;
+		}
+		ungetc(in_fp, c);
+	}
 	free(buf);
 
 	// //*********************Added by Amr*******************************
