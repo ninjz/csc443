@@ -211,13 +211,13 @@ void mk_runs(FILE *in_fp, FILE *out_fp, long run_length){
 	//run_length is the number of records that can fit in the memory
 	char c;
 	char * buf;
-	printf("size of record is %d\n",sizeof(Record));
+	printf("size of record is %ld\n",sizeof(Record));
 	buf = (char *) malloc(run_length*sizeof(Record));
-	int nbrecords=0;
+	int nbrecords;
 	while(1){
 
 		//if not the end of the file
-		nbrecords = read(buf, run_length*(sizeof(Record)), 1 , in_fp);
+		nbrecords = fread(buf, run_length*(sizeof(Record)), 1 , in_fp);
 		qsort((void *) buf, nbrecords/sizeof(Record), sizeof(Record) ,cmpstr);
 		fputs(buf, out_fp);
 
