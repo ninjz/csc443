@@ -217,7 +217,7 @@ void mk_runs(FILE *in_fp, FILE *out_fp, long run_length){
 	while(1){
 
 		//if not the end of the file
-		nbrecords = read(buf, run_length*(sizeof(Record)), 1 , inf_fp);
+		nbrecords = read(buf, run_length*(sizeof(Record)), 1 , in_fp);
 		qsort((void *) buf, nbrecords/sizeof(Record), sizeof(Record) ,cmpstr);
 		fputs(buf, out_fp);
 
