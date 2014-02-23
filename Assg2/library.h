@@ -11,11 +11,11 @@
 //typedef const char* V;
 //otherwise the I get compiler complaints for iterators
 typedef char* V;
-typedef std::vector<V> Record;
+//typedef std::vector<V> Record;
 
 //for fixed size records
 const int nbAttributes = 9;
-const int AttributeSize = sizeof(char);
+const int AttributeSize = 1;
 
 typedef struct {
     void *data;

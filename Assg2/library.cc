@@ -11,10 +11,11 @@ int fixed_len_sizeof(Record *record){
  * Serialize the record to a byte array to be stored in buf.
  */
 void fixed_len_write(Record *record, void *buf){
-	for(Record::iterator it = record->begin();	it!= record->end();++it){
-		memcpy(buf,*it,AttributeSize);
-		buf = (char*)buf + AttributeSize;
-	}
+	//for(Record::iterator it = record->begin();	it!= record->end();++it){
+
+		memcpy(buf,record,AttributeSize*nbAttributes);
+		buf = (char*)buf + AttributeSize*nbAttributes;
+	//}
 }
 
 /**
@@ -22,10 +23,10 @@ void fixed_len_write(Record *record, void *buf){
  * stores the record in `record`.
  */
 void fixed_len_read(void *buf, int size, Record * record){
-	for(Record::iterator it = record->begin(); it != record->end(); ++it){
-		memcpy(*it,buf,AttributeSize);
-		buf = (char*)buf + AttributeSize;	
-	}
+	//for(Record::iterator it = record->begin(); it != record->end(); ++it){
+		memcpy(record,buf,AttributeSize*nbAttributes);
+		buf = (char*)buf + AttributeSize*nbAttributes;	
+	//}
 }
 
 /**
