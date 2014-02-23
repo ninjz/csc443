@@ -16,14 +16,35 @@ int main(int argc, char* argv[]){
 		return 0;
 
 	}
-	int nbRecords = atoi(argv[2]);
-	char * buf = "01234567\0\n";
 
+
+	int nbRecords = atoi(argv[2]);
+
+	const char * buf2 = "6543210\0\n";
+	for (int i=0; i< nbRecords; i++){
+
+		fwrite(buf2, sizeof(char), 9, file);
+
+	}
+
+
+	const char * buf = "0123456\0\n";
 	for (int i=0; i< nbRecords; i++){
 
 		fwrite(buf, sizeof(char), 9, file);
 
 	}
+	const char * buf1 = "7654321\0\n";
+	for (int i=0; i< nbRecords; i++){
+
+		fwrite(buf1, sizeof(char), 9, file);
+
+	}
+
+
+
+
+	fclose(file);
 
 	return 0;
 }
