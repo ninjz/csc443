@@ -217,9 +217,12 @@ void mk_runs(FILE *in_fp, FILE *out_fp, long run_length){
 	while(1){
 
 		//if not the end of the file
-		nbrecords = fread(buf, run_length*(sizeof(Record)), 1 , in_fp);
-		qsort((void *) buf, nbrecords/sizeof(Record), sizeof(Record) ,cmpstr);
-		fputs(buf, out_fp);
+		nbrecords = fread(buf, sizeof(Record), run_length, in_fp);
+
+ 
+		printf("nbrewacorsd i %d\n", nbrecords);
+		qsort((void *) buf, nbrecords, sizeof(Record) ,cmpstr);
+		fwrite(buf,sizeof(Record), nbrecords,out_fp);
 
 		c = fgetc(in_fp);
 		if (c ==EOF){
@@ -328,7 +331,103 @@ void mk_runs(FILE *in_fp, FILE *out_fp, long run_length){
 
 
 
+RunIterator::RunIterator(FILE *fp, long start_pos, long run_length, long buf_size){
 
+
+// 	//************** added by Calvin**************************
+// 	this->curr_pos = 0;
+// 	this->size = run_length;
+// 	this->buf = (char *)malloc(buf_size);
+// 	fseek(fp, start_pos, SEEK_SET); // seek to start pos
+// 	fread(this->buf, sizeof(char), run_length, fp);
+
+
+// 	//************* added by Amr *****************************
+
+// 	//file has to be read into pages.
+
+	//defined for initalizing records and pages.
+
+	
+	Record r;
+	Page p;
+	init_fixed_len_page(&p,buf_size, sizeof(Record)); // initialize the page 
+	char c;
+	long nbRecords =0;
+	while (nbrecords < run_length){
+		fseek (fp, start_pos, SEEK_SET); 
+		fread(r,AttributeSize, nbAttributes, fp);
+		printf("record is %s\n", r);
+		nbrecords++;
+
+		if(add_fixed_len_page(&p,&r) == -1){  //page is full
+
+			fwrite(p.data,p.page_size,sizeof(char),out_fp);
+			memset(p.data, 0, p.page_size);
+			if(add_fixed_len_page(&p,&r) !=0){
+				printf("ERROR while writing to %s\n","out_fp");
+
+			}
+		}
+		//take a peak at the next char if its EOF break the loop
+		c = getc(file);
+		if (c == EOF){
+			break;
+		}
+		ungetc(c,file);
+	}
+
+	if(fixed_len_page_freeslots(&p) !=  fixed_len_page_capacity(&p)){
+		fwrite(p.data,p.page_size,sizeof(char),out_fp);
+	}
+
+	free(p.data);
+
+}
+
+Record* RunIterator::next(){
+	Record *record;
+	if(this->curr_pos >= this->size){
+		return NULL;
+	}
+	strncpy((char *)record, (const char *)this->buf[this->curr_pos], sizeof(Record));
+	this->curr_pos += sizeof(Record);
+	return record;
+}
+
+
+
+
+
+void merge_runs(FILE *out_fp, 
+				RunIterator iterators[], 
+				int num_iterators,
+			    long buf_size)
+{
+	Record *buf[buf_size];  // idk if this is how u do this
+	RunIterator *iter;
+	int done_iterators = 0;
+
+	while(done_iterators < num_iterators){
+		int num = 0;
+
+		done_iterators = 0;
+
+		for(int i = 0; i < num_iterators; i++){
+			Record *temp = iterators[i].next();
+			if(temp != NULL){
+				buf[i] = temp;
+				num++;
+				done_iterators++;
+			}
+
+		}
+
+		qsort((void *)buf, num, sizeof(Record), strcmp);
+		fputs((const char *)buf,out_fp);
+	}
+	
+}
 
 
 
