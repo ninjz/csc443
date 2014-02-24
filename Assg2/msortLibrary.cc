@@ -327,61 +327,15 @@ void mk_runs(FILE *in_fp, FILE *out_fp, long run_length){
 
 // 	//************* added by Amr *****************************
 
-// 	//file has to be read into pages.
 
 
 
 RunIterator::RunIterator(FILE *fp, long start_pos, long run_length, long buf_size){
-
-
-// 	//************** added by Calvin**************************
-// 	this->curr_pos = 0;
-// 	this->size = run_length;
-// 	this->buf = (char *)malloc(buf_size);
-// 	fseek(fp, start_pos, SEEK_SET); // seek to start pos
-// 	fread(this->buf, sizeof(char), run_length, fp);
-
-
-// 	//************* added by Amr *****************************
-
-// 	//file has to be read into pages.
-
-	//defined for initalizing records and pages.
-
-	
-	Record r;
-	Page p;
-	init_fixed_len_page(&p,buf_size, sizeof(Record)); // initialize the page 
-	char c;
-	long nbRecords =0;
-	while (nbrecords < run_length){
-		fseek (fp, start_pos, SEEK_SET); 
-		fread(r,AttributeSize, nbAttributes, fp);
-		printf("record is %s\n", r);
-		nbrecords++;
-
-		if(add_fixed_len_page(&p,&r) == -1){  //page is full
-
-			fwrite(p.data,p.page_size,sizeof(char),out_fp);
-			memset(p.data, 0, p.page_size);
-			if(add_fixed_len_page(&p,&r) !=0){
-				printf("ERROR while writing to %s\n","out_fp");
-
-			}
-		}
-		//take a peak at the next char if its EOF break the loop
-		c = getc(file);
-		if (c == EOF){
-			break;
-		}
-		ungetc(c,file);
-	}
-
-	if(fixed_len_page_freeslots(&p) !=  fixed_len_page_capacity(&p)){
-		fwrite(p.data,p.page_size,sizeof(char),out_fp);
-	}
-
-	free(p.data);
+	this->curr_pos = 0;
+	this->size = run_length;
+	this->buf = (char *)malloc(buf_size);
+	fseek(fp, start_pos, SEEK_SET); // seek to start pos
+	fread(this->buf, sizeof(char), run_length, fp);
 
 }
 
@@ -404,28 +358,71 @@ void merge_runs(FILE *out_fp,
 				int num_iterators,
 			    long buf_size)
 {
-	Record *buf[buf_size];  // idk if this is how u do this
-	RunIterator *iter;
-	int done_iterators = 0;
 
-	while(done_iterators < num_iterators){
-		int num = 0;
 
-		done_iterators = 0;
 
-		for(int i = 0; i < num_iterators; i++){
-			Record *temp = iterators[i].next();
-			if(temp != NULL){
-				buf[i] = temp;
-				num++;
-				done_iterators++;
-			}
+	// //iterators has to be read into pages;
+	// for (int i = 0; i<num_iterators ; i++){ //read the iterator into pages
+	// 	init_fixed_len_page(&p,buf_size, sizeof(Record)); // initialize the page 
+	// char c;
+	// long nbRecords =0;
+	// while (nbrecords < run_length){
+	// 	fseek (fp, start_pos, SEEK_SET); 
+	// 	fread(r,AttributeSize, nbAttributes, fp);
+	// 	printf("record is %s\n", r);
+	// 	nbrecords++;
 
-		}
+	// 	if(add_fixed_len_page(&p,&r) == -1){  //page is full
 
-		qsort((void *)buf, num, sizeof(Record), strcmp);
-		fputs((const char *)buf,out_fp);
-	}
+	// 		fwrite(p.data,p.page_size,sizeof(char),out_fp);
+	// 		memset(p.data, 0, p.page_size);
+	// 		if(add_fixed_len_page(&p,&r) !=0){
+	// 			printf("ERROR while writing to %s\n","out_fp");
+
+	// 		}
+	// 	}
+	// 	//take a peak at the next char if its EOF break the loop
+	// 	c = getc(file);
+	// 	if (c == EOF){
+	// 		break;
+	// 	}
+	// 	ungetc(c,file);
+	// }
+
+	// if(fixed_len_page_freeslots(&p) !=  fixed_len_page_capacity(&p)){
+	// 	fwrite(p.data,p.page_size,sizeof(char),out_fp);
+	// }
+
+	// free(p.data);
+
+
+	//}
+
+
+
+
+	// Record *buf[buf_size];  // idk if this is how u do this
+	// RunIterator *iter;
+	// int done_iterators = 0;
+
+	// while(done_iterators < num_iterators){
+	// 	int num = 0;
+
+	// 	done_iterators = 0;
+
+	// 	for(int i = 0; i < num_iterators; i++){
+	// 		Record *temp = iterators[i].next();
+	// 		if(temp != NULL){
+	// 			buf[i] = temp;
+	// 			num++;
+	// 			done_iterators++;
+	// 		}
+
+	// 	}
+
+	// 	qsort((void *)buf, num, sizeof(Record), strcmp);
+	// 	fputs((const char *)buf,out_fp);
+	// }
 	
 }
 
@@ -506,18 +503,39 @@ int main(int argc, char * argv[]){
 
 	}
 
-	page_size = mem_capacity / k;
-	//make page files of size page_size
-	//mk_filePage(in_fp, argv[1],page_size);
 	//each record is of size 9 so the length of the first run is 
-	long run_length = mem_capacity/9;
+	long run_length = mem_capacity/sizeof(Record);
+	long buf_size = run_length;
 	//create runs of size mem_capacity and that is mem_capacity sorted. 
 	mk_runs(in_fp, out_fp, run_length);
-
 	fclose(in_fp);
 	fclose(out_fp);
-	//merge runs from out_fp
 
+
+	out_fp = fopen(argv[2],"r");
+	if(out_fp == NULL){
+		exit(0);
+	}
+	RunIterator *iteratorsArray;
+	int num_iterators;
+	char * buf;
+	int start_pos=0;
+	//merge runs from out_fp
+	while (1){
+		//read iterator from out_fp;
+		
+		start_pos+=run_length;
+		iteratorsArray[num_iterators] = RunIterator::RunIterator(out_fp, start_pos, run_length, buf_size);;
+		num_iterators ++;
+	}
+	fclose(out_fp);
+	out_fp = fopen(argv[2], "w");
+	if(out_fp == NULL){
+		exit(0);
+
+	}
+	merge_runs(out_fp, iteratorsArray, num_iterators, buf_size);
+	fclose(out_fp);
 	return 0;
 
 }
