@@ -8,7 +8,7 @@
 //for fixed size records
 const int nbAttributes = 9;
 const int AttributeSize = 1;
-//int page_size;
+int num_iterators;
 
 typedef char Record[9];
 typedef struct {
@@ -91,6 +91,8 @@ void mk_runs(FILE *in_fp, FILE *out_fp, long run_length);
 
 
 class RunIterator {
+
+	public:
 	int curr_pos;
 	int size;
 	char *buf;
@@ -99,7 +101,7 @@ class RunIterator {
 	* scan through a run that starts at `start_pos`
 	* with length `run_length`
 	*/
-public:
+
 	RunIterator(FILE *fp, long start_pos, long run_length, long buf_size);
 	/**
 	* reads the next record. Returns null if
