@@ -20,7 +20,7 @@ int main(int argc, char* argv[]){
 
 	int nbRecords = atoi(argv[2]);
 
-	const char * buf2 = "6543210\0\n";
+	const char * buf2 = "6543210\n\0";
 	for (int i=0; i< nbRecords; i++){
 
 		fwrite(buf2, sizeof(char), 9, file);
@@ -28,13 +28,13 @@ int main(int argc, char* argv[]){
 	}
 
 
-	const char * buf = "0123456\0\n";
+	const char * buf = "0123456\n\0";
 	for (int i=0; i< nbRecords; i++){
 
 		fwrite(buf, sizeof(char), 9, file);
 
 	}
-	const char * buf1 = "7654321\0\n";
+	const char * buf1 = "7654321\n\0";
 	for (int i=0; i< nbRecords; i++){
 
 		fwrite(buf1, sizeof(char), 9, file);
