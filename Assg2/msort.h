@@ -9,6 +9,10 @@
 const int nbAttributes = 9;
 const int AttributeSize = 1;
 int num_iterators;
+long run_length;
+long page_size;
+long nbPages;
+long buf_size;
 
 typedef char Record[9];
 typedef struct {
@@ -96,6 +100,7 @@ class RunIterator {
 	int curr_pos;
 	int size;
 	char *buf;
+	int start_pos;
 	/**
 	* creates an iterator using the `buf_size` to
 	* scan through a run that starts at `start_pos`
