@@ -223,6 +223,7 @@ void mk_runs(FILE *in_fp, FILE *out_fp, long run_length){
 		printf("nbrewacorsd i %d\n", nbrecords);
 		qsort((void *) buf, nbrecords, sizeof(Record) ,cmpstr);
 		fwrite(buf,sizeof(Record), nbrecords,out_fp);
+		num_iterators ++;
 
 		c = fgetc(in_fp);
 		if (c ==EOF){
@@ -233,109 +234,21 @@ void mk_runs(FILE *in_fp, FILE *out_fp, long run_length){
 	}
 	free(buf);
 
-	// //*********************Added by Amr*******************************
-
-	//1.read run_length records into buffer the first time
-	// int nbRecords =0;
-	// Page p;
-	// Record r;
-	// char c;
-	// printf("this is the size of page_size%d\n", page_size);
-	// printf("this is the run_length %d \n ", (int)run_length);
-
-
-	// in_fp = fopen("in_fp", "r");
-	// if(in_fp == NULL){
-	// 	exit(0);
-	// }
-
-	// init_fixed_len_page(&p,page_size,AttributeSize*nbAttributes);
-	// char * buf = (char *) malloc(run_length);
-	// int offset = 0;
-	// //int nbRecordsForlastPage = 0;
-
-	// while(1){ //keep running until there is no more pages in a file
-
-
-	// 	while (run_length - nbRecords >= page_size/9){ // read pages into memory  until we can't fit any more pages
-
-	// 		fread(p.data,p.page_size,sizeof(char),in_fp); //read one page from in_fp filepage
-	// 		int nbSlots = fixed_len_page_capacity(&p); 
-	// 		int freeSlots = fixed_len_page_freeslots(&p);
-
-	// 	printf("this is the rnbSlots %d \n ", (int)nbSlots);
-	// 	printf("this is the freeSlots %d \n ", (int)freeSlots);
-	// 		for(int i=0;i<nbSlots-freeSlots;i++){
-
-	// 			nbRecords++;
-	// 			read_fixed_len_page(&p,i,&r);
-	// 			memcpy(buf+ offset, r, nbAttributes*AttributeSize); //copy into buf
-	// 			printf("buffer is now %s\n", buf);
-	// 			offset +=nbAttributes*AttributeSize;
-	// 			//memset(p.data,0,p.page_size);
-	// 		}
-
-	// 		//check for the 
-	// 		c= fgetc(in_fp);
-	// 		if (c == EOF ) break;
-	// 		ungetc(c, in_fp);
-
-
-	// 	}
-
-
-	// 	qsort((void *) buf, run_length, sizeof(Record), cmpstr);
-	// 	fwrite(buf,run_length, sizeof(char), out_fp);
-	// 	//set nbRecords to 0 in order to use for another run
-	// 	nbRecords =0;
-	// 	memset(p.data,0,p.page_size);
-
-	// 	//check for the 
-	// 	c= fgetc(in_fp);
-	// 	if (c == EOF ) break;
-	// 	ungetc(c, in_fp);
-
-	// }
-
-	// qsort((void *) buf, nbRecords, sizeof(Record), cmpstr);
-	// fwrite(buf,nbRecords, sizeof(char), out_fp);
-
-
-	// free(p.data);
-	// free(buf);
-	// fclose(in_fp);
-	// fclose(out_fp);
 }
 
-
-
-
-// /**
-// * currently does not use page reads.
-// */
-
-// RunIterator::RunIterator(FILE *fp, long start_pos, long run_length, long buf_size){
-
-
-// 	//************** added by Calvin**************************
-// 	this->curr_pos = 0;
-// 	this->size = run_length;
-// 	this->buf = (char *)malloc(buf_size);
-// 	fseek(fp, start_pos, SEEK_SET); // seek to start pos
-// 	fread(this->buf, sizeof(char), run_length, fp);
-
-
-// 	//************* added by Amr *****************************
-
-
-
-
+/**
+* fp is an open file to read from ,
+* start_pos is the position in the file fp to start reading from
+* run_length is the number of records per run
+* buf_size is the page_size of records used for the runs.
+**/
 RunIterator::RunIterator(FILE *fp, long start_pos, long run_length, long buf_size){
-	this->curr_pos = 0;
-	this->size = run_length;
-	this->buf = (char *)malloc(buf_size);
+	this->curr_pos = 0; // record offset in the run
+	this->size = run_length; //size of the run --> how many records is there for each run
+	this->buf = (char *)malloc(buf_size * sizeof(Record)); //size of the page used for runs to fill it in. 
 	fseek(fp, start_pos, SEEK_SET); // seek to start pos
-	fread(this->buf, sizeof(char), run_length, fp);
+	fread(this->buf, sizeof(Record), buf_size,fp); //read one page from the run in the fp file
+
 
 }
 
@@ -359,188 +272,121 @@ void merge_runs(FILE *out_fp,
 			    long buf_size)
 {
 
+	int i = 0; //used to make sure we merge all iterators.
+	int nbRecords = 0; //used to make sure that we don't exceed the page_size 
+	long page_size = sizeof(iterators[0].buf); // get the size of a page.
+	char * buffer = (char *) malloc(buf_size); // memory buffer
+	
 
-
-
-
-	Page p;
-	//iterators has to be read into pages;
-	for (int i = 0; i<num_iterators ; i++){ //read the iterator into pages
-		init_fixed_len_page(&p,buf_size, sizeof(Record)); // initialize the page 
-	char c;
-	long nbRecords =0;
-	while (nbrecords < run_length){
-		fseek (fp, start_pos, SEEK_SET); 
-		fread(r,AttributeSize, nbAttributes, fp);
-		printf("record is %s\n", r);
-		nbrecords++;
-
-		if(add_fixed_len_page(&p,&r) == -1){  //page is full
-
-			fwrite(p.data,p.page_size,sizeof(char),out_fp);
-			memset(p.data, 0, p.page_size);
-			if(add_fixed_len_page(&p,&r) !=0){
-				printf("ERROR while writing to %s\n","out_fp");
-
-			}
+	while (i < num_iterators){//we haven't gone through all the iterators 
+		while((i*page_size < buf_size) && (iterators[i].next() != NULL)){	//there is space to put it in memory and we haven't reached the end of the iterator
+				
+			nbRecords++;
 		}
-		//take a peak at the next char if its EOF break the loop
-		c = getc(file);
-		if (c == EOF){
-			break;
-		}
-		ungetc(c,file);
+		i++;
 	}
+	//sort it 
+	qsort((void *) buffer, nbRecords, sizeof(Record), cmpstr);
+	//write it out 
+	fwrite(buffer, buf_size, 1,out_fp);
+	free(buffer);
 
-	if(fixed_len_page_freeslots(&p) !=  fixed_len_page_capacity(&p)){
-		fwrite(p.data,p.page_size,sizeof(char),out_fp);
-	}
-
-	free(p.data);
-
-
-	}
 }
 
 
-
-	// Record *buf[buf_size];  // idk if this is how u do this
-	// RunIterator *iter;
-	// int done_iterators = 0;
-
-	// while(done_iterators < num_iterators){
-	// 	int num = 0;
-
-	// 	done_iterators = 0;
-
-	// 	for(int i = 0; i < num_iterators; i++){
-	// 		Record *temp = iterators[i].next();
-	// 		if(temp != NULL){
-	// 			buf[i] = temp;
-	// 			num++;
-	// 			done_iterators++;
-	// 		}
-
-	// 	}
-
-	// 	qsort((void *)buf, num, sizeof(Record), strcmp);
-	// 	fputs((const char *)buf,out_fp);
-	// }
-	
-//}
-
-
-
-
-
-// }
-
-// Record* RunIterator::next(){
-// 	Record *record;
-// 	if(this->curr_pos >= this->size){
-// 		return NULL;
-// 	}
-// 	strncpy((char *)record, (const char *)this->buf[this->curr_pos], sizeof(Record));
-// 	this->curr_pos += sizeof(Record);
-// 	return record;
-// }
-
-
-// void merge_runs(FILE *out_fp, 
-// 				RunIterator iterators[], 
-// 				int num_iterators,
-// 			    long buf_size)
-// {
-// 	Record *buf[buf_size];  // idk if this is how u do this
-// 	RunIterator *iter;
-// 	int done_iterators = 0;
-
-// 	while(done_iterators < num_iterators){
-// 		int num = 0;
-
-// 		done_iterators = 0;
-
-// 		for(int i = 0; i < num_iterators; i++){
-// 			Record *temp = iterators[i].next();
-// 			if(temp != NULL){
-// 				buf[i] = temp;
-// 				num++;
-// 				done_iterators++;
-// 			}
-
-// 		}
-
-// 		qsort((void *)buf, num, sizeof(Record), strcmp);
-// 		fputs((const char *)buf,out_fp);
-// 	}
-	
-// }
 int main(int argc, char * argv[]){
-
-	if (argc != 5){
-		printf("proper usage: msort <input_file> <out_file> <mem_capacity> <k>\n");
-		return 0;
-
-	}
 
 	FILE * in_fp, *out_fp;
 	int mem_capacity, k;
 
-	if (! (k = atoi(argv[4]))){
-		printf("Error converting k to integer\n");
+//*** checking if we got correct format and no erros happen while oppening files **************************
+	if (argc != 5){ 																					//*
+		printf("proper usage: msort <input_file> <out_file> <mem_capacity> <k>\n"); 					//*
+		return 0; 																						//*
+ 																										//*
+	} 																									//*
+ 																										//*
+ 																										//*
+ 																										//*
+	if (! (k = atoi(argv[4]))){ 																		//*
+		printf("Error converting k to integer\n"); 														//* 														//*
+ 																										//*
+	} 																									//*
+	if (! (mem_capacity = atoi(argv[3]))){ 																//*
+		printf("Error converting mem_capcity to int\n");												//*
+ 																										//*
+	} 																									//*
+ 																										//*
+	out_fp = fopen(argv[2],"w"); 																		//*
+	if(out_fp == NULL){ 																				//*
+		exit(0); 																						//*
+	} 																									//*
+ 																										//*			
+	in_fp = fopen(argv[1], "r"); 																		//*
+	if(in_fp == NULL){ 																					//*
+		exit(0); 																						//*
+ 																										//*
+	} 																									//*
+//*********************************************************************************************************
 
-	}
-	if (! (mem_capacity = atoi(argv[3]))){
-		printf("Error converting mem_capcity to int\n");
-
-	}
-
-	out_fp = fopen(argv[2],"w");
-	if(out_fp == NULL){
-		exit(0);
-	}
-
-	in_fp = fopen(argv[1], "r");
-	if(in_fp == NULL){
-		exit(0);
-
-	}
-
-	//each record is of size 9 so the length of the first run is 
-	long run_length = mem_capacity/sizeof(Record);
-	long buf_size = run_length;
-
-	int nbPages= mem_capacity/k+1; //without the buffer
-	//create runs of size mem_capacity and that is mem_capacity sorted. 
-	mk_runs(in_fp, out_fp, run_length);
-	fclose(in_fp);
-	fclose(out_fp);
 
 
-	out_fp = fopen(argv[2],"r");
-	if(out_fp == NULL){
-		exit(0);
-	}
-	RunIterator *iteratorsArray;
-	int num_iterators;
-	char * buf;
-	int start_pos=0;
+
+
+
+//************************** create runs of memory_capacity sorted **************************************************************
+	long run_length = mem_capacity/sizeof(Record); // initalize run length is the number of records we can fit into memroy    //*
+	long buf_size = run_length; // buf_size is going to be the number of records we can fit into memeory ALWAYS				  //*
+																															  //*
+	long page_size = buf_size/k+1; // page_size is the number of records we can fit per page 								  //*
+																															  //*
+																															  //*
+	//create runs of size mem_capacity and that is mem_capacity-sorted then we can use these in merge sort to sort them out.  //*
+	num_iterators = 0;  																									  //*
+	mk_runs(in_fp, out_fp, run_length); 																					  //*
+	fclose(in_fp);																											  //*
+	fclose(out_fp);																											  //*
+//*******************************************************************************************************************************
+
+
+
+
+//********************* use the runs that are mem_capacity and merge them together to get a sorted file ***************************
+																																//*
+//*check for errors whle reading the file and initalize necessaly variables****** 												//*	 																		  //*												//*
+	RunIterator *iteratorsArray;                                              //*												//*
+						                                                      //*												//*
+	char * buf;    															  //*												//*
+	int start_pos=0;                       									  //*												//*
+																																//*
 	//merge runs from out_fp
-	while (1){
-		//read iterator from out_fp;
-		
-		start_pos+=run_length;
-		iteratorsArray[num_iterators] = RunIterator::RunIterator(out_fp, start_pos, run_length, buf_size);;
-		num_iterators ++;
-	}
-	fclose(out_fp);
-	out_fp = fopen(argv[2], "w");
-	if(out_fp == NULL){
+	out_fp = fopen(argv[2],"r");                                              //*												//*	
+	if(out_fp == NULL){														  //*												//*
+		exit(0);                                                              //*												//*
+	}	
+	in_fp = fopen(argv[1], "w");																	  //*												//*
+	if (in_fp == NULL){
 		exit(0);
+	}
+//*******************************************************************************												//*
+
+
+// ***************** mergin happens here ***************************************************************
+	while (num_iterators >=1){
+		//read iterator from out_fp;
+		for (int j = 0; j< num_iterators; j++){ //initialize iterators 
+			iteratorsArray[j] = RunIterator::RunIterator(out_fp, start_pos, run_length, page_size);
+			start_pos+=run_length;
+		}
+		merge_runs(in_fp, iteratorsArray, num_iterators, buf_size);
+		num_iterators = num_iterators / k; //decrease the number of iterators
+		run_length = run_length * k; //increase the run_length
+		std::swap(in_fp, out_fp); //swap out_fp and in_fp
 
 	}
-	merge_runs(out_fp, iteratorsArray, num_iterators, buf_size);
+	std::swap(in_fp, out_fp); //swap out_fp and in_fp
 	fclose(out_fp);
+	fclose(in_fp);
 	return 0;
 
 }
