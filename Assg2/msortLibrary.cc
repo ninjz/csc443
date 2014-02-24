@@ -188,25 +188,6 @@ int cmpstr(void const *a, void const *b) {
 */
 void mk_runs(FILE *in_fp, FILE *out_fp, long run_length){
 
-
-
-	// //*****************Done by Calvin**************************
-	// char * buf;
-	// int amount_read;
-	// buf = (char *) malloc(run_length);
-	
- //    while ( ! feof (in_fp) ){
- //    	// Grab run_length amount of data and put in buf to be sorted.
-	// 	amount_read = fread(buf , run_length, 1, in_fp);	
- //    	// sort data in buf.
-	// 	qsort((void *)buf, amount_read, sizeof(Record), cmpstr);
-	// 	fputs(buf, out_fp);
- //    }
-
- //    fclose(in_fp);
- //    fclose(out_fp);
-	// free(buf);
-
 	
 	//run_length is the number of records that can fit in the memory
 	char c;
@@ -253,12 +234,12 @@ RunIterator::RunIterator(FILE *fp, long start_pos, long run_length, long buf_siz
 
 }
 
-Record* RunIterator::next(){
-	Record *record;
+Record RunIterator::next(){
+	Record record = malloc(sizeof(Record));
 	if(this->curr_pos >= this->size){
 		return NULL;
 	}
-	strncpy((char *)record, (char *)this->buf[this->curr_pos], sizeof(Record));
+	memcpy(record, (void *)(this->buf[curr_pos]), sizeof(Record));
 	this->curr_pos += sizeof(Record);
 	return record;
 }
@@ -275,29 +256,40 @@ void merge_runs(FILE *out_fp,
 
 	int i = 0; //used to make sure we merge all iterators.
 	long nbRecords = 0; //used to make sure that we don't exceed the page_size 
-	Record * buffer = (Record *) malloc(buf_size); // memory buffer
+	Record * buffer = (Record *) malloc(buf_size * sizeof(Record)); // memory buffer
 	long nbPages = run_length / page_size; //number of pages per iterator
 	long nbindex = 0; //used to iterate throgh pages in runs
-
+	Record *r = (Record*) malloc(sizeof(Record));
 
 	while (nbindex < nbPages){ // while there is still more pages in the runs
 		int i=0;
-		while (i < num_iterators){//we haven't gone through all the iterators 
+		while (i <= num_iterators){//we haven't gone through all the iterators 
 			while((i*page_size < buf_size)){	//there is space to put it in memory and we haven't reached the end of the iterator
+				int offset =i;
 				for (int j=0; j<page_size; j++){ // fill the buf with records from the page
-					strncpy((char *) buffer[i+j],(char *)iterators[i].next(),sizeof(Record));
+								printf("before merge_runs3\n");
+								memcpy ((void *)r, (void *)iterators[i].next(), sizeof(Record));
+								printf("this is the record%s\n", r);
+							//strncpy((char *)buffer[offset],(char *)iterators[i].next(),sizeof(Record));
+								printf("before merge_runs4\n");
+								offset++;
 				}
 				iterators[i].start_pos += page_size;
 				i++;
+				printf("before merge_runs5\n");
 			}
 			//sort it 
+
+			printf("before merge_runs6\n");
 			qsort((void *) buffer, nbRecords, sizeof(Record), cmpstr);
 			//write it out 
 			fwrite(buffer, buf_size, 1,out_fp);
 		}
+		printf("before merge_runs7\n");
 		nbindex++;
 	}
-
+	printf("before merge_runs8\n");
+	free(r);
 	free(buffer);
 }
 
@@ -344,8 +336,11 @@ int main(int argc, char * argv[]){
 
 //************************** create runs of memory_capacity sorted **************************************************************
 	run_length = mem_capacity/sizeof(Record); // initalize run length is the number of records we can fit into memroy    //*
-	buf_size = run_length; // buf_size is going to be the number of records we can fit into memeory ALWAYS				  //*
-	page_size = buf_size/k+1; // page_size is the number of records we can fit per page 								  //*
+	printf("this is run_length%ld\n",run_length );
+	buf_size = run_length; // buf_size is going to be the number of records we can fit into memeory ALWAYS
+	printf("this is buf_size%ld\n",buf_size );				  //*
+	page_size = buf_size/k+1; // page_size is the number of records we can fit per page 	
+	printf("this is page_size%ld\n",page_size );							  //*
 																															  //*
 																															  //*
 	//create runs of size mem_capacity and that is mem_capacity-sorted then we can use these in merge sort to sort them out.  //*
@@ -355,18 +350,18 @@ int main(int argc, char * argv[]){
 	fclose(out_fp);	
 																									  //*
 //*******************************************************************************************************************************
-
+printf("this is the number of itereators %d\n", num_iterators);
 
 
 
 //********************* use the runs that are mem_capacity and merge them together to get a sorted file ***************************
 																																//*
 //*check for errors whle reading the file and initalize necessaly variables****** 												//*	 																		  //*												//*
-	RunIterator *iteratorsArray;                                              //*												//*
+	RunIterator *iteratorsArray = (RunIterator *) malloc(sizeof(RunIterator) * num_iterators);                                              //*												//*
 						                                                      //*												//*
-	char * buf;    															  //*												//*
+  															  //*												//*
 	int start_pos=0;                       									  //*												//*
-																																//*
+	char * buf;																															//*
 	//merge runs from out_fp
 	out_fp = fopen(argv[2],"r");                                              //*												//*	
 	if(out_fp == NULL){														  //*												//*
@@ -385,14 +380,17 @@ int main(int argc, char * argv[]){
 		for (int j = 0; j< num_iterators; j++){ //initialize iterators 
 			iteratorsArray[j] = RunIterator::RunIterator(out_fp, start_pos, run_length, page_size);
 			start_pos+=run_length;
+			printf("this is the start position%d\n", start_pos);
 		}
+		
 		merge_runs(in_fp, iteratorsArray, num_iterators, buf_size);
+		printf("after merge_run\n");
 		num_iterators = num_iterators / k; //decrease the number of iterators
 		run_length = run_length * k; //increase the run_length
-		std::swap(in_fp, out_fp); //swap out_fp and in_fp
+		//std::swap(in_fp, out_fp); //swap out_fp and in_fp
 
 	}
-	std::swap(in_fp, out_fp); //swap out_fp and in_fp
+	//std::swap(in_fp, out_fp); //swap out_fp and in_fp
 	fclose(out_fp);
 	fclose(in_fp);
 	return 0;
