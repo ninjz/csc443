@@ -244,6 +244,7 @@ void mk_runs(FILE *in_fp, FILE *out_fp, long run_length){
 **/
 RunIterator::RunIterator(FILE *fp, long start_pos, long run_length, long buf_size){
 	this->curr_pos = 0; // record offset in the run
+	this->start_pos = start_pos; 
 	this->size = run_length; //size of the run --> how many records is there for each run
 	this->buf = (char *)malloc(buf_size * sizeof(Record)); //size of the page used for runs to fill it in. 
 	fseek(fp, start_pos, SEEK_SET); // seek to start pos
@@ -273,24 +274,31 @@ void merge_runs(FILE *out_fp,
 {
 
 	int i = 0; //used to make sure we merge all iterators.
-	int nbRecords = 0; //used to make sure that we don't exceed the page_size 
-	long page_size = sizeof(iterators[0].buf); // get the size of a page.
-	char * buffer = (char *) malloc(buf_size); // memory buffer
-	
+	long nbRecords = 0; //used to make sure that we don't exceed the page_size 
+	Record * buffer = (Record *) malloc(buf_size); // memory buffer
+	long nbPages = run_length / page_size; //number of pages per iterator
+	long nbindex = 0; //used to iterate throgh pages in runs
 
-	while (i < num_iterators){//we haven't gone through all the iterators 
-		while((i*page_size < buf_size) && (iterators[i].next() != NULL)){	//there is space to put it in memory and we haven't reached the end of the iterator
-				
-			nbRecords++;
+
+	while (nbindex < nbPages){ // while there is still more pages in the runs
+		int i=0;
+		while (i < num_iterators){//we haven't gone through all the iterators 
+			while((i*page_size < buf_size)){	//there is space to put it in memory and we haven't reached the end of the iterator
+				for (int j=0; j<page_size; j++){ // fill the buf with records from the page
+					strncpy((char *) buffer[i+j],(char *)iterators[i].next(),sizeof(Record));
+				}
+				iterators[i].start_pos += page_size;
+				i++;
+			}
+			//sort it 
+			qsort((void *) buffer, nbRecords, sizeof(Record), cmpstr);
+			//write it out 
+			fwrite(buffer, buf_size, 1,out_fp);
 		}
-		i++;
+		nbindex++;
 	}
-	//sort it 
-	qsort((void *) buffer, nbRecords, sizeof(Record), cmpstr);
-	//write it out 
-	fwrite(buffer, buf_size, 1,out_fp);
-	free(buffer);
 
+	free(buffer);
 }
 
 
@@ -335,17 +343,17 @@ int main(int argc, char * argv[]){
 
 
 //************************** create runs of memory_capacity sorted **************************************************************
-	long run_length = mem_capacity/sizeof(Record); // initalize run length is the number of records we can fit into memroy    //*
-	long buf_size = run_length; // buf_size is going to be the number of records we can fit into memeory ALWAYS				  //*
-																															  //*
-	long page_size = buf_size/k+1; // page_size is the number of records we can fit per page 								  //*
+	run_length = mem_capacity/sizeof(Record); // initalize run length is the number of records we can fit into memroy    //*
+	buf_size = run_length; // buf_size is going to be the number of records we can fit into memeory ALWAYS				  //*
+	page_size = buf_size/k+1; // page_size is the number of records we can fit per page 								  //*
 																															  //*
 																															  //*
 	//create runs of size mem_capacity and that is mem_capacity-sorted then we can use these in merge sort to sort them out.  //*
 	num_iterators = 0;  																									  //*
 	mk_runs(in_fp, out_fp, run_length); 																					  //*
 	fclose(in_fp);																											  //*
-	fclose(out_fp);																											  //*
+	fclose(out_fp);	
+																									  //*
 //*******************************************************************************************************************************
 
 
