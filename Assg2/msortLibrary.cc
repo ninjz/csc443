@@ -344,7 +344,7 @@ Record* RunIterator::next(){
 	if(this->curr_pos >= this->size){
 		return NULL;
 	}
-	strncpy((char *)record, (const char *)this->buf[this->curr_pos], sizeof(Record));
+	strncpy((char *)record, (char *)this->buf[this->curr_pos], sizeof(Record));
 	this->curr_pos += sizeof(Record);
 	return record;
 }
@@ -361,43 +361,46 @@ void merge_runs(FILE *out_fp,
 
 
 
-	// //iterators has to be read into pages;
-	// for (int i = 0; i<num_iterators ; i++){ //read the iterator into pages
-	// 	init_fixed_len_page(&p,buf_size, sizeof(Record)); // initialize the page 
-	// char c;
-	// long nbRecords =0;
-	// while (nbrecords < run_length){
-	// 	fseek (fp, start_pos, SEEK_SET); 
-	// 	fread(r,AttributeSize, nbAttributes, fp);
-	// 	printf("record is %s\n", r);
-	// 	nbrecords++;
-
-	// 	if(add_fixed_len_page(&p,&r) == -1){  //page is full
-
-	// 		fwrite(p.data,p.page_size,sizeof(char),out_fp);
-	// 		memset(p.data, 0, p.page_size);
-	// 		if(add_fixed_len_page(&p,&r) !=0){
-	// 			printf("ERROR while writing to %s\n","out_fp");
-
-	// 		}
-	// 	}
-	// 	//take a peak at the next char if its EOF break the loop
-	// 	c = getc(file);
-	// 	if (c == EOF){
-	// 		break;
-	// 	}
-	// 	ungetc(c,file);
-	// }
-
-	// if(fixed_len_page_freeslots(&p) !=  fixed_len_page_capacity(&p)){
-	// 	fwrite(p.data,p.page_size,sizeof(char),out_fp);
-	// }
-
-	// free(p.data);
 
 
-	//}
+	Page p;
+	//iterators has to be read into pages;
+	for (int i = 0; i<num_iterators ; i++){ //read the iterator into pages
+		init_fixed_len_page(&p,buf_size, sizeof(Record)); // initialize the page 
+	char c;
+	long nbRecords =0;
+	while (nbrecords < run_length){
+		fseek (fp, start_pos, SEEK_SET); 
+		fread(r,AttributeSize, nbAttributes, fp);
+		printf("record is %s\n", r);
+		nbrecords++;
 
+		if(add_fixed_len_page(&p,&r) == -1){  //page is full
+
+			fwrite(p.data,p.page_size,sizeof(char),out_fp);
+			memset(p.data, 0, p.page_size);
+			if(add_fixed_len_page(&p,&r) !=0){
+				printf("ERROR while writing to %s\n","out_fp");
+
+			}
+		}
+		//take a peak at the next char if its EOF break the loop
+		c = getc(file);
+		if (c == EOF){
+			break;
+		}
+		ungetc(c,file);
+	}
+
+	if(fixed_len_page_freeslots(&p) !=  fixed_len_page_capacity(&p)){
+		fwrite(p.data,p.page_size,sizeof(char),out_fp);
+	}
+
+	free(p.data);
+
+
+	}
+}
 
 
 
@@ -424,7 +427,7 @@ void merge_runs(FILE *out_fp,
 	// 	fputs((const char *)buf,out_fp);
 	// }
 	
-}
+//}
 
 
 
@@ -506,6 +509,8 @@ int main(int argc, char * argv[]){
 	//each record is of size 9 so the length of the first run is 
 	long run_length = mem_capacity/sizeof(Record);
 	long buf_size = run_length;
+
+	int nbPages= mem_capacity/k+1; //without the buffer
 	//create runs of size mem_capacity and that is mem_capacity sorted. 
 	mk_runs(in_fp, out_fp, run_length);
 	fclose(in_fp);
