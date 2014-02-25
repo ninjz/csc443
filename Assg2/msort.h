@@ -115,7 +115,7 @@ class RunIterator {
 	* reads the next record. Returns null if
 	* iterator reads the end of the run.
 	*/
-		Record* next();
+		char * next();
 };
 
 void merge_runs(FILE *out_fp, 
