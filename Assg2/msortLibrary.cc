@@ -341,56 +341,56 @@ int main(int argc, char * argv[]){
 	fclose(in_fp);																											  //*
 	fclose(out_fp);	
 																									  //*
-//*******************************************************************************************************************************
-printf("this is the number of itereators %d\n", num_iterators);
+// //*******************************************************************************************************************************
+// printf("this is the number of itereators %d\n", num_iterators);
 
 
 
-//********************* use the runs that are mem_capacity and merge them together to get a sorted file ***************************
-																																//*
-//*check for errors whle reading the file and initalize necessaly variables****** 												//*	 																		  //*												//*
-	                                             //*												//*
-						                                                      //*												//*
-  																			  //*												//*
-	long start_pos=0;                       									  //*												//*
-	char * buf;																															//*
-	//merge runs from out_fp
-	out_fp = fopen(argv[2],"r");                                              //*												//*	
-	if(out_fp == NULL){														  //*												//*
-		exit(0);                                                              //*												//*
-	}	
-	in_fp = fopen(argv[1], "w");																	  //*												//*
-	if (in_fp == NULL){
-		exit(0);
-	}
-//*******************************************************************************												//*
+// //********************* use the runs that are mem_capacity and merge them together to get a sorted file ***************************
+// 																																//*
+// //*check for errors whle reading the file and initalize necessaly variables****** 												//*	 																		  //*												//*
+// 	                                             //*												//*
+// 						                                                      //*												//*
+//   																			  //*												//*
+// 	long start_pos=0;                       									  //*												//*
+// 	char * buf;																															//*
+// 	//merge runs from out_fp
+// 	out_fp = fopen(argv[2],"r");                                              //*												//*	
+// 	if(out_fp == NULL){														  //*												//*
+// 		exit(0);                                                              //*												//*
+// 	}	
+// 	in_fp = fopen(argv[1], "w");																	  //*												//*
+// 	if (in_fp == NULL){
+// 		exit(0);
+// 	}
+// //*******************************************************************************												//*
 
 
-FILE *from, *to;
-from = out_fp;
-to = in_fp;
-// ***************** mergin happens here ***************************************************************
-	while (num_iterators >=1){
-		//read iterator from out_fp;
-		RunIterator *iteratorsArray = (RunIterator *) malloc(sizeof(RunIterator) * num_iterators); 	
-		for (int j = 0; j< num_iterators; j++){ //initialize iterators 
-			//iteratorsArray[j] = (RunIterator *) malloc(sizeof(RunIterator));
-			iteratorsArray[j] = RunIterator::RunIterator(out_fp, start_pos, run_length, page_size);
+// FILE *from, *to;
+// from = out_fp;
+// to = in_fp;
+// // ***************** mergin happens here ***************************************************************
+// 	while (num_iterators >=1){
+// 		//read iterator from out_fp;
+// 		RunIterator *iteratorsArray = (RunIterator *) malloc(sizeof(RunIterator) * num_iterators); 	
+// 		for (int j = 0; j< num_iterators; j++){ //initialize iterators 
+// 			//iteratorsArray[j] = (RunIterator *) malloc(sizeof(RunIterator));
+// 			iteratorsArray[j] = RunIterator::RunIterator(out_fp, start_pos, run_length, page_size);
 
-			start_pos+=run_length;
-		}
+// 			start_pos+=run_length;
+// 		}
 		
-		merge_runs(from, iteratorsArray, num_iterators, buf_size);
-		num_iterators = num_iterators / k; //decrease the number of iterators
-		run_length = run_length * k; //increase the run_length
-		std::swap(from, to); 
-		free(iteratorsArray);
+// 		merge_runs(from, iteratorsArray, num_iterators, buf_size);
+// 		num_iterators = num_iterators / k; //decrease the number of iterators
+// 		run_length = run_length * k; //increase the run_length
+// 		std::swap(from, to); 
+// 		free(iteratorsArray);
 
-	}
-	std::swap(from, to);
-	out_fp = from ;
-	fclose(out_fp);
-	fclose(in_fp);
+// 	}
+// 	std::swap(from, to);
+// 	out_fp = from ;
+	// fclose(out_fp);
+	// fclose(in_fp);
 
 	//clock_gettime(CLOCK_REALTIME,&t1);
 	//double ti = (t1.tv_sec*1e9+t1.tv_nsec-t.tv_sec*1e9-t.tv_nsec)/1e6;
