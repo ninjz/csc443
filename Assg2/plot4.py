@@ -15,31 +15,31 @@ yPoints3 = []
 
 ans = 0.0	
 for j in range(10):
-	proc = Popen(['./msort','file100','out_file100','1024', '2'],stdout=PIPE,stderr=STDOUT)
+	proc = Popen(['./msort','file_in100','out_file100','1024', '2'],stdout=PIPE,stderr=STDOUT)
 	line = proc.stdout.readline()
-	#print line
+	print line
 	ans = float(line.split(' ')[1])		
-	xPoints.append(i)
+	xPoints.append(j+1)
 	yPoints.append(ans)
 
 
 ans = 0.0
 for j in range(10):
-	proc = Popen(['./msort','file100', 'out_file100','1024', '1024'],stdout=PIPE,stderr=STDOUT)
+	proc = Popen(['./msort','file_in100', 'out_file100','1024', '1024'],stdout=PIPE,stderr=STDOUT)
 	line = proc.stdout.readline()
-	#print line
+	print line
 	ans = float(line.split(' ')[1])		
-	xPoints2.append(i)
+	xPoints2.append(j+1)
 	yPoints2.append(ans)
 
 ans = 0.0
 
 for j in range(10):
-	proc = Popen(['./bsort','file100', 'out_file100'],stdout=PIPE,stderr=STDOUT)
+	proc = Popen(['./bsort','file_in100', 'out_file100'],stdout=PIPE,stderr=STDOUT)
 	line = proc.stdout.readline()
-	#print line
+	print line
 	ans = float(line.split(' ')[1])		
-	xPoints3.append(i)
+	xPoints3.append(j+1)
 	yPoints3.append(ans)
 
 
@@ -64,4 +64,5 @@ plt.title("trial number vs time")
 plt.xlabel("trial number")
 plt.ylabel("time in milliseconds")
 plt.savefig('bsort.png')
+
 
