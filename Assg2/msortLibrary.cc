@@ -8,6 +8,7 @@
 
 
 
+
 /**
 
 used for qsort
@@ -31,7 +32,7 @@ void mk_runs(FILE *in_fp, FILE *out_fp, long run_length){
 	//run_length is the number of records that can fit in the memory
 	char c;
 	char * buf;
-	printf("size of record is %ld\n",sizeof(Record));
+	//printf("size of record is %ld\n",sizeof(Record));
 	buf = (char *) malloc(run_length*sizeof(Record));
 	int nbrecords;
 	while(1){
@@ -40,7 +41,7 @@ void mk_runs(FILE *in_fp, FILE *out_fp, long run_length){
 		nbrecords = fread(buf, sizeof(Record), run_length, in_fp);
 
  
-		printf("nbrewacorsd i %d\n", nbrecords);
+		//printf("nbrewacorsd i %d\n", nbrecords);
 		qsort((void *) buf, nbrecords, sizeof(Record) ,cmpstr);
 		fwrite(buf,sizeof(Record), nbrecords,out_fp);
 		num_iterators ++;
@@ -119,7 +120,7 @@ record[i] = this->buf[this->curr_pos];
 this->curr_pos ++;
 }	
 
-printf("record is %s\n", record);
+//printf("record is %s\n", record);
 return record;
 }
 
@@ -252,8 +253,8 @@ return record;
 	// free(buffer);
 void merge_runs(FILE *out_fp, RunIterator iterators[], int num_iterators, long buf_size)
 {
-	struct timespec t,t1;
-	clock_gettime(CLOCK_REALTIME,&t);
+	clock_t start, finish;
+	start = clock();
 	char buf[buf_size]; // idk if this is how u do this
 	RunIterator *iter;
 	int done_iterators = 0;
@@ -287,10 +288,20 @@ void merge_runs(FILE *out_fp, RunIterator iterators[], int num_iterators, long b
 }
 
 
+static double diffclock(clock_t clock1,clock_t clock2)
+{
+    double diffticks=clock1-clock2;
+    double diffms=(diffticks)/(CLOCKS_PER_SEC/1000);
+    return diffms;
+}
+
 int main(int argc, char * argv[]){
 
 	FILE * in_fp, *out_fp;
 	int mem_capacity, k;
+	clock_t start, finish;
+	start = clock();
+
 
 //*** checking if we got correct format and no erros happen while oppening files **************************
 	if (argc != 5){ 																					//*
@@ -347,54 +358,56 @@ int main(int argc, char * argv[]){
 
 
 
-// //********************* use the runs that are mem_capacity and merge them together to get a sorted file ***************************
-// 																																//*
-// //*check for errors whle reading the file and initalize necessaly variables****** 												//*	 																		  //*												//*
-// 	                                             //*												//*
-// 						                                                      //*												//*
-//   																			  //*												//*
-// 	long start_pos=0;                       									  //*												//*
-// 	char * buf;																															//*
-// 	//merge runs from out_fp
-// 	out_fp = fopen(argv[2],"r");                                              //*												//*	
-// 	if(out_fp == NULL){														  //*												//*
-// 		exit(0);                                                              //*												//*
-// 	}	
-// 	in_fp = fopen(argv[1], "w");																	  //*												//*
-// 	if (in_fp == NULL){
-// 		exit(0);
-// 	}
-// //*******************************************************************************												//*
+//********************* use the runs that are mem_capacity and merge them together to get a sorted file ***************************
+																																//*
+//*check for errors whle reading the file and initalize necessaly variables****** 												//*	 																		  //*												//*
+	                                             //*												//*
+						                                                      //*												//*
+  																			  //*												//*
+	long start_pos=0;                       									  //*												//*
+	char * buf;																															//*
+	//merge runs from out_fp
+	out_fp = fopen(argv[2],"r");                                              //*												//*	
+	if(out_fp == NULL){														  //*												//*
+		exit(0);                                                              //*												//*
+	}	
+	in_fp = fopen(argv[1], "w");																	  //*												//*
+	if (in_fp == NULL){
+		exit(0);
+	}
+//*******************************************************************************												//*
 
 
-// FILE *from, *to;
-// from = out_fp;
-// to = in_fp;
-// // ***************** mergin happens here ***************************************************************
-// 	while (num_iterators >=1){
-// 		//read iterator from out_fp;
-// 		RunIterator *iteratorsArray = (RunIterator *) malloc(sizeof(RunIterator) * num_iterators); 	
-// 		for (int j = 0; j< num_iterators; j++){ //initialize iterators 
-// 			//iteratorsArray[j] = (RunIterator *) malloc(sizeof(RunIterator));
-// 			iteratorsArray[j] = RunIterator::RunIterator(out_fp, start_pos, run_length, page_size);
+FILE *from, *to;
+from = out_fp;
+to = in_fp;
+// ***************** mergin happens here ***************************************************************
+	while (num_iterators >=1){
+		//read iterator from out_fp;
+		RunIterator *iteratorsArray = (RunIterator *) malloc(sizeof(RunIterator) * num_iterators); 	
+		for (int j = 0; j< num_iterators; j++){ //initialize iterators 
+			//iteratorsArray[j] = (RunIterator *) malloc(sizeof(RunIterator));
+			iteratorsArray[j] = RunIterator::RunIterator(out_fp, start_pos, run_length, page_size);
 
-// 			start_pos+=run_length;
-// 		}
+			start_pos+=run_length;
+		}
 		
-// 		merge_runs(from, iteratorsArray, num_iterators, buf_size);
-// 		num_iterators = num_iterators / k; //decrease the number of iterators
-// 		run_length = run_length * k; //increase the run_length
-// 		std::swap(from, to); 
-// 		free(iteratorsArray);
+		merge_runs(from, iteratorsArray, num_iterators, buf_size);
+		num_iterators = num_iterators / k; //decrease the number of iterators
+		run_length = run_length * k; //increase the run_length
+		std::swap(from, to); 
+		free(iteratorsArray);
 
-// 	}
-// 	std::swap(from, to);
-// 	out_fp = from ;
-	// fclose(out_fp);
-	// fclose(in_fp);
+	}
+	std::swap(from, to);
+	out_fp = from ;
+	fclose(out_fp);
+	fclose(in_fp);
+	finish = clock();
 
-	clock_gettime(CLOCK_REALTIME,&t1);
-	double ti = (t1.tv_sec*1e9+t1.tv_nsec-t.tv_sec*1e9-t.tv_nsec)/1e6;
+	double ti = diffclock(finish,start);
+	// clock_gettime(CLOCK_REALTIME,&t1);
+	// double ti = (t1.tv_sec*1e9+t1.tv_nsec-t.tv_sec*1e9-t.tv_nsec)/1e6;
 	printf("TIME: %f milliseconds\n",ti);	
 	return 0;
 
