@@ -7,38 +7,11 @@ import matplotlib.pyplot as plt
 xPoints = []
 yPoints = []
 
-xPoints2 = []
-yPoints2 = []
-
 
 ans = 0.0	
 proc = Popen(['./msort','file_in100','file_out100','1024', '2'],stdout=PIPE,stderr=STDOUT)
 line = proc.stdout.readline()
-#print line
-ans = float(line.split(' ')[1])		
-xPoints.append(100)
-yPoints.append(ans)
-
-ans = 0.0	
-proc = Popen(['./msort','file_in100','file_out100','1024', '2'],stdout=PIPE,stderr=STDOUT)
-line = proc.stdout.readline()
-#print line
-ans = float(line.split(' ')[1])		
-xPoints.append(100)
-yPoints.append(ans)
-
-ans = 0.0	
-proc = Popen(['./msort','file_in100','file_out100','1024', '2'],stdout=PIPE,stderr=STDOUT)
-line = proc.stdout.readline()
-#print line
-ans = float(line.split(' ')[1])		
-xPoints.append(100)
-yPoints.append(ans)
-
-ans = 0.0	
-proc = Popen(['./msort','file_in100','file_out100','1024', '2'],stdout=PIPE,stderr=STDOUT)
-line = proc.stdout.readline()
-#print line
+print line
 ans = float(line.split(' ')[1])		
 xPoints.append(100)
 yPoints.append(ans)
@@ -46,42 +19,42 @@ yPoints.append(ans)
 ans = 0.0	
 proc = Popen(['./msort','file_in1000','file_out1000','1024', '2'],stdout=PIPE,stderr=STDOUT)
 line = proc.stdout.readline()
-#print line
+print line
 ans = float(line.split(' ')[1])		
-xPoints.append(100)
+xPoints.append(1000)
 yPoints.append(ans)
 
 ans = 0.0	
 proc = Popen(['./msort','file_in10000','file_out10000','1024', '2'],stdout=PIPE,stderr=STDOUT)
 line = proc.stdout.readline()
-#print line
+print line
 ans = float(line.split(' ')[1])		
-xPoints.append(100)
+xPoints.append(10000)
 yPoints.append(ans)
 
 ans = 0.0	
 proc = Popen(['./msort','file_in100000','file_out100000','1024', '2'],stdout=PIPE,stderr=STDOUT)
 line = proc.stdout.readline()
-#print line
+print line
 ans = float(line.split(' ')[1])		
-xPoints.append(100)
+xPoints.append(100000)
 yPoints.append(ans)
 
-ans = 0.0	
-proc = Popen(['./msort','file_in1000000','file_out1000000','1024', '2'],stdout=PIPE,stderr=STDOUT)
-line = proc.stdout.readline()
-#print line
-ans = float(line.split(' ')[1])		
-xPoints.append(100)
-yPoints.append(ans)
+# ans = 0.0	
+# proc = Popen(['./msort','file_in1000000','file_out1000000','1024', '2'],stdout=PIPE,stderr=STDOUT)
+# line = proc.stdout.readline()
+# print line
+# ans = float(line.split(' ')[1])		
+# xPoints.append(1000000)
+# yPoints.append(ans)
 
-ans = 0.0	
-proc = Popen(['./msort','file_in10000000','file_out10000000','1024', '2'],stdout=PIPE,stderr=STDOUT)
-line = proc.stdout.readline()
-#print line
-ans = float(line.split(' ')[1])		
-xPoints.append(100)
-yPoints.append(ans)
+# ans = 0.0	
+# proc = Popen(['./msort','file_in10000000','file_out10000000','1024', '2'],stdout=PIPE,stderr=STDOUT)
+# line = proc.stdout.readline()
+# print line
+# ans = float(line.split(' ')[1])		
+# xPoints.append(10000000)
+# yPoints.append(ans)
 
 
 
