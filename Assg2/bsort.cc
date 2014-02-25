@@ -10,9 +10,18 @@ typedef char Record[9];
 
 using namespace std;
 
-
+static double diffclock(clock_t clock1,clock_t clock2)
+{
+    double diffticks=clock1-clock2;
+    double diffms=(diffticks)/(CLOCKS_PER_SEC/1000);
+    return diffms;
+}
 
 int main(int argc, char ** argv){
+
+
+	clock_t start, finish;
+	start = clock();
 
 	/**
 	 * opens a database connection to "./leveldb_dir"
@@ -67,7 +76,7 @@ int main(int argc, char ** argv){
 	    string key_str = key.ToString();
 	    string val_str = value.ToString();
 	    fwrite(key_str.c_str(), sizeof(Record), 1, out_index);
-	    cout << key_str << ":"  << val_str << endl;
+	    //cout << key_str << ":"  << val_str << endl;
 	}
 	assert(it->status().ok());  // Check for any errors found during the scan
 	delete it;
@@ -75,5 +84,10 @@ int main(int argc, char ** argv){
 
 	fclose(input_file);
 	fclose(out_index);
+	finish = clock();
+	double ti = diffclock(finish,start);
+	// clock_gettime(CLOCK_REALTIME,&t1);
+	// double ti = (t1.tv_sec*1e9+t1.tv_nsec-t.tv_sec*1e9-t.tv_nsec)/1e6;
+	printf("TIME: %f milliseconds\n",ti);	
 
 }
