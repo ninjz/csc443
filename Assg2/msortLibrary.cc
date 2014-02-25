@@ -252,7 +252,8 @@ return record;
 	// free(buffer);
 void merge_runs(FILE *out_fp, RunIterator iterators[], int num_iterators, long buf_size)
 {
-
+	struct timespec t,t1;
+	clock_gettime(CLOCK_REALTIME,&t);
 	char buf[buf_size]; // idk if this is how u do this
 	RunIterator *iter;
 	int done_iterators = 0;
@@ -328,11 +329,11 @@ int main(int argc, char * argv[]){
 //clock_gettime(CLOCK_REALTIME,&t);
 //************************** create runs of memory_capacity sorted **************************************************************
 	run_length = mem_capacity/sizeof(Record); // initalize run length is the number of records we can fit into memroy    //*
-	printf("this is run_length%ld\n",run_length );
+	//printf("this is run_length%ld\n",run_length );
 	buf_size = run_length; // buf_size is going to be the number of records we can fit into memeory ALWAYS
-	printf("this is buf_size%ld\n",buf_size );				  //*
+	//printf("this is buf_size%ld\n",buf_size );				  //*
 	page_size = buf_size/k+1; // page_size is the number of records we can fit per page 	
-	printf("this is page_size%ld\n",page_size );							  //*
+	//printf("this is page_size%ld\n",page_size );							  //*
 																															  //*
 																															  //*
 	//create runs of size mem_capacity and that is mem_capacity-sorted then we can use these in merge sort to sort them out.  //*
@@ -392,9 +393,9 @@ int main(int argc, char * argv[]){
 	// fclose(out_fp);
 	// fclose(in_fp);
 
-	//clock_gettime(CLOCK_REALTIME,&t1);
-	//double ti = (t1.tv_sec*1e9+t1.tv_nsec-t.tv_sec*1e9-t.tv_nsec)/1e6;
-	//printf("TIME: %f milliseconds\n",ti);	
+	clock_gettime(CLOCK_REALTIME,&t1);
+	double ti = (t1.tv_sec*1e9+t1.tv_nsec-t.tv_sec*1e9-t.tv_nsec)/1e6;
+	printf("TIME: %f milliseconds\n",ti);	
 	return 0;
 
 }
