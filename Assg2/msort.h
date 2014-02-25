@@ -48,9 +48,9 @@ class RunIterator {
 	public:
 	int curr_pos;
 	int size;
-	char **buf;
+	char *buf;
 	int start_pos;
-	char * page;
+	char *page;
 	int page_offset;
 	/**
 	* creates an iterator using the `buf_size` to
