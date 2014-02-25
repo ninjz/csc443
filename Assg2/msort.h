@@ -14,6 +14,7 @@ long page_size;
 long nbPages;
 long buf_size;
 
+
 typedef char Record[9];
 typedef struct {
     void *data;
@@ -101,6 +102,7 @@ class RunIterator {
 	int size;
 	char *buf;
 	int start_pos;
+	char * page;
 	/**
 	* creates an iterator using the `buf_size` to
 	* scan through a run that starts at `start_pos`
