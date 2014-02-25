@@ -11,11 +11,11 @@ ans = 0.0
 
 
 for j in range(10):
-	proc = Popen(['./msort','file_in100','file_out100','1024', str(j*10)],stdout=PIPE,stderr=STDOUT)
+	proc = Popen(['./msort','file_in100','file_out100','1024', str((j+1)*10)],stdout=PIPE,stderr=STDOUT)
 	line = proc.stdout.readline()
-	#print line
+	print line
 	ans = float(line.split(' ')[1])		
-	xPoints.append(100)
+	xPoints.append((j+1)*10)
 	yPoints.append(ans)
 
 
