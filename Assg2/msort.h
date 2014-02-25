@@ -51,7 +51,7 @@ class RunIterator {
 	char *buf;
 	int start_pos;
 	char *page;
-	char *fp;
+	FILE *fp;
 	int page_offset;
 	/**
 	* creates an iterator using the `buf_size` to
