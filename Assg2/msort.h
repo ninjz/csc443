@@ -103,6 +103,7 @@ class RunIterator {
 	char *buf;
 	int start_pos;
 	char * page;
+	int page_offset;
 	/**
 	* creates an iterator using the `buf_size` to
 	* scan through a run that starts at `start_pos`
