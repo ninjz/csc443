@@ -56,6 +56,43 @@ void mk_runs(FILE *in_fp, FILE *out_fp, long run_length){
 
 }
 
+// void merge_runs(FILE *out_fp, 
+// RunIterator iterators[], 
+// int num_iterators,
+//    long buf_size)
+// {
+
+// char buf[buf_size]; // idk if this is how u do this
+// RunIterator *iter;
+// int done_iterators = 0;
+
+
+// while(done_iterators < num_iterators){
+// int num = 0;
+
+// done_iterators = 0;
+// int pos = 0;
+
+// for(int i = 0; i < num_iterators; i++){
+// char * temp = iterators[i].next();
+// if(temp != NULL){
+// for(int j = 0; j < sizeof(Record); j++){
+// buf[pos] = temp[j];
+// pos++;
+// }
+// num++;
+
+// } else {
+// done_iterators++;
+// }
+
+// }
+
+// qsort((void *)buf, num, sizeof(Record), cmpstr);
+// fputs((const char *)buf,out_fp);
+// }
+// 
+// }
 /**
 * fp is an open file to read from ,
 * start_pos is the position in the file fp to start reading from
@@ -63,97 +100,130 @@ void mk_runs(FILE *in_fp, FILE *out_fp, long run_length){
 * buf_size is the page_size of records used for the runs.
 **/
 RunIterator::RunIterator(FILE *fp, long start_pos, long run_length, long buf_size){
-	this->curr_pos = 0; // record offset in the run
-	this->start_pos = start_pos; 
-	this->size = run_length; //size of the run --> how many records is there for each run
-	this->buf = (char **) malloc(buf_size * sizeof(Record)); //size of the page used for runs to fill it in. 
-	this->page = (char *) malloc(page_size * sizeof(Record));// initialize the page 
-	this->page_offset = 0;
-	
-
-
+this->curr_pos = 0; // record offset in the run
+this->start_pos = start_pos; 
+this->size = run_length; //size of the run --> how many records is there for each run
+this->buf = (char *) malloc(buf_size); //size of the page used for runs to fill it in. 
+this->fp = fp;
+fseek(fp, start_pos, SEEK_SET); // seek to start pos
+fread(this->buf, sizeof(char), run_length, fp);
 }
 
 char * RunIterator::next(){
-	char record[9];
-	if(this->curr_pos >= this->size){
-		return NULL;
-	}
-	for (int i= 0; i< sizeof(Record);i++){
-		record[i] = this->buf[this->curr_pos][i];
-		//this->curr_pos++;
-	}	
-	this->curr_pos ++;
-	printf("record is %s\n", record);
-	return record;
+char record[9];
+if(this->curr_pos >= this->size){
+return NULL;
+}
+for (int i= 0; i< sizeof(Record);i++){
+record[i] = this->buf[this->curr_pos];
+this->curr_pos ++;
+}	
+
+printf("record is %s\n", record);
+return record;
 }
 
+// /**
+// * fp is an open file to read from ,
+// * start_pos is the position in the file fp to start reading from
+// * run_length is the number of records per run
+// * buf_size is the page_size of records used for the runs.
+// **/
+// RunIterator::RunIterator(FILE *fp, long start_pos, long run_length, long buf_size){
+// 	this->curr_pos = 0; // record offset in the run
+// 	this->start_pos = start_pos; 
+// 	this->size = run_length; //size of the run --> how many records is there for each run
+// 	this->buf = (char **) malloc(buf_size * sizeof(Record)); //size of the page used for runs to fill it in. 
+// 	this->page = (char *) malloc(page_size * sizeof(Record));// initialize the page 
+// 	this->page_offset = 0;
+// 	fseek(fp, start_pos, SEEK_SET); // seek to start pos
+// 	fread(this->buf ,sizeof(Record) ,this->size,fp);
+// 	printf("iterator buffer is %s\n", this->buf);
+	
 
 
-void merge_runs(FILE *out_fp, 
-				RunIterator iterators[], 
-				int num_iterators,
-			    long buf_size)
-{
+// }
+
+// char * RunIterator::next(){
+// 	char record[9];
+// 	if(this->curr_pos >= this->size){
+// 		return NULL;
+// 	}
+// 	for (int i= 0; i< sizeof(Record);i++){
+// 		record[i] = this->buf[this->curr_pos][i];
+// 		//this->curr_pos++;
+// 	}	
+// 	this->curr_pos ++;
+// 	printf("record is %s\n", record);
+// 	return record;
+// }
 
 
-	int i = 0 ;//keep index of the iterators
-	Record r;
-	int write_page_offset =buf_size - page_size;
-	int page_offset= 0;
-	char * memmory_buffer = (char *) malloc(buf_size * sizeof(Record));
-	while (i < num_iterators){ 												//we haven't gone throgh all the iterators 
-		int offset=0;
-		while (i*page_size < buf_size -page_size ){							// we haven't filled the memory yet, and because one page is for writing out
-			for (int j=0; j< page_size; j++){	
-											//load the page from the iterator at i
-				if (strncpy(r,(char *)iterators[i].next(),sizeof(Record))){
-					printf("r is %s\n",r);
-					strncpy((char *)(iterators[i].page+page_offset), r, sizeof(Record)); //load the record to the page 
-					page_offset+=sizeof(Record);
-					printf("page is %s\n", iterators[i].page);
-				}
-			} 
-			iterators[i].start_pos +=page_size;								// since we wrote one page already
-			strncpy((char *)(memmory_buffer + offset), iterators[i].page, page_size);
-							printf("today was a FUCKED UP DAY\n");
-			offset+=page_size;
-			i++; 															//increment the index for the iterators 
-		}
-		int write_record_offset = 0;
-		Record min_record; 
-		int page_offset =0; 												// this is used to determine which page to replace in memory
-		strncpy(min_record, memmory_buffer, sizeof(Record)); 				//initialize the buffer to the first record in the first page 
-		while(write_record_offset < page_size){
-			for (int k = 0;  k < i;k++){ // get the minimum record
-				if (strcmp((char *) min_record, (char *)(iterators[i-k].page + iterators[i-k].page_offset)) <0){		 //we found a minimum record
-					strncpy((char*)memmory_buffer[write_record_offset],(char *)(iterators[i-k].page[ (int)iterators[i-k].page_offset]), sizeof(Record));
-					write_record_offset+=sizeof(Record);
-					iterators[i-k].page_offset+=sizeof(Record);
-					if (iterators[i-k].page_offset == page_size/sizeof(Record)){ //load a page into memory 
-						for (int j=0; j< page_size; j++){								//load the page from the iterator at i
-							if (strncpy(r,(char *)iterators[i-k].next(),sizeof(Record))){
-								strncpy(iterators[i-k].page, (char *) r, sizeof(Record)); //load the record to the page 
-							}
-						} 
-						iterators[i-k].start_pos +=page_size;	
-						strncpy((char *)(memmory_buffer + (i-k)*sizeof(Record)), iterators[i-k].page, page_size);
-					}
 
-				}
+// void merge_runs(FILE *out_fp, 
+// 				RunIterator iterators[], 
+// 				int num_iterators,
+// 			    long buf_size)
+// {
 
-			}
-		}
-		fwrite(memmory_buffer,page_size, 1, out_fp);
-		//get the minimum record from a page and put it into the buffer page.
 
-	}
-	for (int z=0; z < num_iterators; z++){
-		free (iterators[z].buf);
-		free (iterators[z].page);
-	}
-	free(memmory_buffer);
-}
+// 	int i = 0 ;//keep index of the iterators
+// 	Record r;
+// 	int write_page_offset =buf_size - page_size;
+// 	int page_offset= 0;
+// 	char * memmory_buffer = (char *) malloc(buf_size * sizeof(Record));
+// 	while (i < num_iterators){ 												//we haven't gone throgh all the iterators 
+// 		int offset=0;
+// 		while (i*page_size < buf_size -page_size ){							// we haven't filled the memory yet, and because one page is for writing out
+// 			for (int j=0; j< page_size; j++){	
+// 											//load the page from the iterator at i
+// 				if (strncpy(r,(char *)iterators[i].next(),sizeof(Record))){
+// 					printf("r is %s\n",r);
+// 					strncpy((char *)(iterators[i].page+page_offset), r, sizeof(Record)); //load the record to the page 
+// 					page_offset+=sizeof(Record);
+// 					printf("page is %s\n", iterators[i].page);
+// 				}
+// 			} 
+// 			iterators[i].start_pos +=page_size;								// since we wrote one page already
+// 			strncpy((char *)(memmory_buffer + offset), iterators[i].page, page_size);
+// 							printf("today was a FUCKED UP DAY\n");
+// 			offset+=page_size;
+// 			i++; 															//increment the index for the iterators 
+// 		}
+// 		int write_record_offset = 0;
+// 		Record min_record; 
+// 		int page_offset =0; 												// this is used to determine which page to replace in memory
+// 		strncpy(min_record, memmory_buffer, sizeof(Record)); 				//initialize the buffer to the first record in the first page 
+// 		while(write_record_offset < page_size){
+// 			for (int k = 0;  k < i;k++){ // get the minimum record
+// 				if (strcmp((char *) min_record, (char *)(iterators[i-k].page + iterators[i-k].page_offset)) <0){		 //we found a minimum record
+// 					strncpy((char*)memmory_buffer[write_record_offset],(char *)(iterators[i-k].page[ (int)iterators[i-k].page_offset]), sizeof(Record));
+// 					write_record_offset+=sizeof(Record);
+// 					iterators[i-k].page_offset+=sizeof(Record);
+// 					if (iterators[i-k].page_offset == page_size/sizeof(Record)){ //load a page into memory 
+// 						for (int j=0; j< page_size; j++){								//load the page from the iterator at i
+// 							if (strncpy(r,(char *)iterators[i-k].next(),sizeof(Record))){
+// 								strncpy(iterators[i-k].page, (char *) r, sizeof(Record)); //load the record to the page 
+// 							}
+// 						} 
+// 						iterators[i-k].start_pos +=page_size;	
+// 						strncpy((char *)(memmory_buffer + (i-k)*sizeof(Record)), iterators[i-k].page, page_size);
+// 					}
+
+// 				}
+
+// 			}
+// 		}
+// 		fwrite(memmory_buffer,page_size, 1, out_fp);
+// 		//get the minimum record from a page and put it into the buffer page.
+
+// 	}
+// 	for (int z=0; z < num_iterators; z++){
+// 		free (iterators[z].buf);
+// 		free (iterators[z].page);
+// 	}
+// 	free(memmory_buffer);
+// }
 	// int i = 0; //used to make sure we merge all iterators.
 	// long nbRecords = 0; //used to make sure that we don't exceed the page_size 
 	// Record * buffer = (Record *) malloc(buf_size * sizeof(Record)); // memory buffer
@@ -180,7 +250,40 @@ void merge_runs(FILE *out_fp,
 	// 	nbindex++;
 	// }
 	// free(buffer);
+void merge_runs(FILE *out_fp, RunIterator iterators[], int num_iterators, long buf_size)
+{
 
+	char buf[buf_size]; // idk if this is how u do this
+	RunIterator *iter;
+	int done_iterators = 0;
+
+
+	while(done_iterators < num_iterators){
+		int num = 0;
+
+	done_iterators = 0;
+	int pos = 0;
+
+	for(int i = 0; i < num_iterators; i++){
+		char * temp = iterators[i].next();
+		if(temp != NULL){
+		for(int j = 0; j < sizeof(Record); j++){
+		buf[pos] = temp[j];
+		pos++;
+	}
+	num++;
+
+	} else {
+		done_iterators++;
+	}
+
+	}
+
+	qsort((void *)buf, num, sizeof(Record), cmpstr);
+	fputs((const char *)buf,out_fp);
+	}
+
+}
 
 
 int main(int argc, char * argv[]){
@@ -273,8 +376,6 @@ to = in_fp;
 		for (int j = 0; j< num_iterators; j++){ //initialize iterators 
 			//iteratorsArray[j] = (RunIterator *) malloc(sizeof(RunIterator));
 			iteratorsArray[j] = RunIterator::RunIterator(out_fp, start_pos, run_length, page_size);
-			fseek(out_fp, start_pos, SEEK_SET); // seek to start pos
-			fread(iteratorsArray[j].buf , run_length,sizeof(Record)-1,out_fp);
 
 			start_pos+=run_length;
 		}
