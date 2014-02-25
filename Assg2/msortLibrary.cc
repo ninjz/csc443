@@ -114,7 +114,7 @@ char record[9];
 if(this->curr_pos >= this->size){
 return NULL;
 }
-for (int i= 0; i< sizeof(Record);i++){
+for (int i= 0; i< (signed) sizeof(Record);i++){
 record[i] = this->buf[this->curr_pos];
 this->curr_pos ++;
 }	
